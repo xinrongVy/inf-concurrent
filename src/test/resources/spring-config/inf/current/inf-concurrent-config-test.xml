@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	<context:annotation-config />
+
+	<aop:aspectj-autoproxy />
+
+	<bean class="com.ly.fn.inf.config.ctx.config.PropertyPlaceholderConfigurer">
+		<property name="systemId" value="biz-pay-fi-mas-srv" />
+	</bean>
+	<bean id="inf-rpc.NsRegistry" class="com.ly.fn.inf.config.ctx.ns.NsRegistryImpl">
+		<property name="nsHome" value="${nsHome}" />
+	</bean>
+
+	<bean id="ac-txn.TxnConcurrentRedisConnFactory" class="com.ly.fn.inf.redis.NsRedisConnectionFactory">
+		<property name="nsPath" value="${redis.server.path}" />
+		<property name="nsRegistry" ref="inf-rpc.NsRegistry" />
+	</bean>
+
+	<bean id="biz-pay-fi-mas-srv.ConcurrentControlRedisTemplate" class="com.ly.fn.inf.redis.DefaultRedisTemplate">
+		<property name="connectionFactory" ref="ac-txn.TxnConcurrentRedisConnFactory"/>
+	</bean>
+
+	<import resource="classpath:spring-config/inf/current/inf-concurrent-config.xml" />
+
+	<bean name="concurrentTestService" class="MockedConcurrentedServiceImpl"></bean>
+	<bean name="failCustomReturnFailStrategy" class="FailCustomReturnFailStrategy"></bean>
+	<bean name="failCustomReturnPassStrategy" class="FailCustomReturnPassStrategy"></bean>
+
+</beans>
